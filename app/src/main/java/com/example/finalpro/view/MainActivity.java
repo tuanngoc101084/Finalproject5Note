@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import android.app.Activity;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
@@ -44,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void Initilial() {
-        text2Speech= new GetLanguageForText2Speech(getApplicationContext());
+        text2Speech= new GetLanguageForText2Speech(getApplicationContext(), MainActivity.this);
     }
 
     private void Event_Text2Speech() {
@@ -55,6 +56,12 @@ public class MainActivity extends AppCompatActivity {
               text2Speech.SetspeechRate( Float.valueOf(spinner.getSelectedItem().toString().replace('x',' ')));
               text2Speech.SpeakOut(editTextInput.getText().toString());
 
+          }
+      });
+      btSave.setOnClickListener(new View.OnClickListener() {
+          @Override
+          public void onClick(View v) {
+              text2Speech.fileCreate(editTextInput.getText().toString());
           }
       });
 

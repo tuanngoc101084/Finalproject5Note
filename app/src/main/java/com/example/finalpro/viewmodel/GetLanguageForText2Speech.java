@@ -1,19 +1,39 @@
 package com.example.finalpro.viewmodel;
 
+import android.Manifest;
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Environment;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
+import java.io.File;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Random;
 import java.util.UUID;
 
 public class GetLanguageForText2Speech {
     TextToSpeech textToSpeech;
+    Activity mActivity;
     Context context;
     Boolean Ready=false;
-    public GetLanguageForText2Speech(Context contextInput)
+    private String envPath = Environment.getDataDirectory().getAbsolutePath() + "/Text2Speech";
+    private Uri fileUri;
+    public GetLanguageForText2Speech(Context contextInput,Activity activity)
     {
         context= contextInput;
+        mActivity= activity;
         textToSpeech = new TextToSpeech(contextInput, new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
@@ -21,7 +41,114 @@ public class GetLanguageForText2Speech {
             }
         });
         textToSpeech.setSpeechRate(1);
+//        textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+//            @Override
+//            public void onStart(String utteranceId) {
+//                Toast.makeText(context,"onStart Starting...!",Toast.LENGTH_LONG).show();
+//            }
+//
+//            @Override
+//            public void onDone(String utteranceId) {
+//                Toast.makeText(context,"onDone Complete!",Toast.LENGTH_LONG).show();
+//            }
+//
+//            @Override
+//            public void onError(String utteranceId) {
+//                Toast.makeText(context,"OnError "+ utteranceId,Toast.LENGTH_LONG).show();
+//            }
+//        });
     }
+    public void fileCreate(String text) {
+//        Toast.makeText(context,"fileCreate "+ text,Toast.LENGTH_LONG).show();
+//        String folder_main = "NewFolder";
+//
+//        File f = new File(Environment.getRootDirectory(), folder_main);
+//        if (!f.exists()) {
+//            f.mkdirs();
+//        }
+//       // File root = Environment.DIRECTORY_DOWNLOADS;
+        if (isCheckWriteExternal()&& isCheckpermission(Manifest.permission.WRITE_EXTERNAL_STORAGE))
+        {
+            File dir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/tuanngoc/");
+            dir.mkdir();
+            if (dir.exists())
+            {
+                Toast.makeText(context,"fileCreate "+ "Exist",Toast.LENGTH_LONG).show();
+                File file = new File(dir, "tuanngoc" + new Random().nextDouble() +".mp3");
+                int test = textToSpeech.synthesizeToFile((CharSequence) text, null, file, "tts");
+            }
+            else
+            {
+                Toast.makeText(context,"fileCreate "+ "Not Exist",Toast.LENGTH_LONG).show();
+            }
+        }
+        else
+        {
+            showpermission();
+            Toast.makeText(context,"fileCreate "+ "Not Permission",Toast.LENGTH_LONG).show();
+        }
+
+
+
+
+    }
+
+    private void showpermission()
+    {
+      if(ActivityCompat.shouldShowRequestPermissionRationale(mActivity,Manifest.permission.WRITE_EXTERNAL_STORAGE))
+      {
+          new AlertDialog.Builder(context)
+                  .setTitle("Permission needed")
+                  .setMessage("This permission is needed because of this and that")
+                  .setPositiveButton("ok", new DialogInterface.OnClickListener() {
+                      @Override
+                      public void onClick(DialogInterface dialog, int which) {
+                          ActivityCompat.requestPermissions(mActivity,
+                                  new String[] {Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+                      }
+                  })
+                  .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                      @Override
+                      public void onClick(DialogInterface dialog, int which) {
+                          dialog.dismiss();
+                      }
+                  })
+                  .create().show();
+      }
+      else
+      {
+           ActivityCompat.requestPermissions(mActivity,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},1);
+      }
+    }
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int... grantResults) {
+        if (requestCode == 1)  {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(context, "Permission GRANTED", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(context, "Permission DENIED", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+    private  Boolean isCheckWriteExternal()
+    {
+        if(Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
+        {
+            Toast.makeText(context,"External  "+ "Enable",Toast.LENGTH_LONG).show();
+            return  true;
+        }
+        else
+        {
+            Toast.makeText(context,"External  "+ "Disable",Toast.LENGTH_LONG).show();
+            return  false;
+        }
+    }
+    private  Boolean isCheckpermission(String Permission)
+    {
+        int check= ContextCompat.checkSelfPermission(context,Permission);
+        return (check== PackageManager.PERMISSION_GRANTED);
+
+    }
+
     public void SpeakOut(String inputtext) {
         if(!Ready)
         {
@@ -59,4 +186,5 @@ public class GetLanguageForText2Speech {
         }
 
     }
+
 }
