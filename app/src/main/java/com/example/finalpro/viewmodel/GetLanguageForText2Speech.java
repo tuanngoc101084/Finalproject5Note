@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Environment;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -41,41 +42,18 @@ public class GetLanguageForText2Speech {
             }
         });
         textToSpeech.setSpeechRate(1);
-//        textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
-//            @Override
-//            public void onStart(String utteranceId) {
-//                Toast.makeText(context,"onStart Starting...!",Toast.LENGTH_LONG).show();
-//            }
-//
-//            @Override
-//            public void onDone(String utteranceId) {
-//                Toast.makeText(context,"onDone Complete!",Toast.LENGTH_LONG).show();
-//            }
-//
-//            @Override
-//            public void onError(String utteranceId) {
-//                Toast.makeText(context,"OnError "+ utteranceId,Toast.LENGTH_LONG).show();
-//            }
-//        });
     }
-    public void fileCreate(String text) {
-//        Toast.makeText(context,"fileCreate "+ text,Toast.LENGTH_LONG).show();
-//        String folder_main = "NewFolder";
-//
-//        File f = new File(Environment.getRootDirectory(), folder_main);
-//        if (!f.exists()) {
-//            f.mkdirs();
-//        }
-//       // File root = Environment.DIRECTORY_DOWNLOADS;
+    public void fileCreate(String text,String namefolder) {
         if (isCheckWriteExternal()&& isCheckpermission(Manifest.permission.WRITE_EXTERNAL_STORAGE))
         {
-            File dir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/tuanngoc/");
+            Log.d("nnn",namefolder);
+            File dir = new File(Environment.getExternalStorageDirectory().getAbsolutePath()+ "/5Note" + "/"+namefolder+"/");
             dir.mkdir();
             if (dir.exists())
             {
-                Toast.makeText(context,"fileCreate "+ "Exist",Toast.LENGTH_LONG).show();
-                File file = new File(dir, "tuanngoc" + new Random().nextDouble() +".mp3");
+                File file = new File(dir, "Text2Speech" + new Random().nextDouble() +".mp3");
                 int test = textToSpeech.synthesizeToFile((CharSequence) text, null, file, "tts");
+                Toast.makeText(context,"fileCreate "+ " Successfully !",Toast.LENGTH_LONG).show();
             }
             else
             {
@@ -87,8 +65,6 @@ public class GetLanguageForText2Speech {
             showpermission();
             Toast.makeText(context,"fileCreate "+ "Not Permission",Toast.LENGTH_LONG).show();
         }
-
-
 
 
     }
@@ -117,18 +93,10 @@ public class GetLanguageForText2Speech {
       }
       else
       {
-           ActivityCompat.requestPermissions(mActivity,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},1);
+           ActivityCompat.requestPermissions(mActivity,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.BLUETOOTH},1);
       }
     }
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int... grantResults) {
-        if (requestCode == 1)  {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(context, "Permission GRANTED", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(context, "Permission DENIED", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
+
     private  Boolean isCheckWriteExternal()
     {
         if(Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
